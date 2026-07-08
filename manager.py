@@ -3,11 +3,16 @@ from album import Album
 from graphics import *
 
 def get_value_between(prompt, low, high):
-    choice = int(input(prompt))
-    while choice < low or choice > high:
-        print("Please enter a value between %d and %d" % (low, high))
-        choice = int(input(prompt))
-    return choice
+    while True:
+        try:
+            choice = int(input(prompt))
+        except ValueError:
+            print("Please enter a valid number!")
+            continue
+        if choice < low or choice > high:
+            print("Please enter a value between %d and %d" % (low, high))
+            continue
+        return choice
 
 
 def initialize(filename, title):
