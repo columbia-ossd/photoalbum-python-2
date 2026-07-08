@@ -79,20 +79,19 @@ def searchByTag(album):
     print()
     tags = " ".join(album.get_tags())
     print("Here are the tags: " + tags)
-
     search_terms = input("Enter the tag(s) to search for, separated by spaces: ").lower().split()
-
+    
     # Remove duplicate search terms while keeping the original order.
     unique_terms = []
     for term in search_terms:
         if term not in unique_terms:
             unique_terms.append(term)
-
+    
     if len(unique_terms) == 0:
-        print("No tags entered")
+        print("No tags entered.")
         return
-
-    all_matches = []
+    
+    all_matches= []
     partial_matches = []
 
     for photo in album.get_photos():
@@ -102,15 +101,15 @@ def searchByTag(album):
 
         for term in unique_terms:
             if term in photo_tags:
-                matches_any = True
+                matches_any = True 
             else:
                 matches_all = False
-
+    
         if matches_all:
             all_matches.append(photo)
         elif matches_any:
             partial_matches.append(photo)
-
+    
     if len(unique_terms) == 1:
         if len(all_matches) > 0:
             print("Here are the photos for that tag:")
@@ -118,20 +117,21 @@ def searchByTag(album):
                 print(str(photo))
         else:
             print("No photos found for tag " + unique_terms[0])
+    
     else:
         if len(all_matches) > 0:
-            print("Here are the photos with all of those tags:")
+            print("Here are the photos that match all of those tags:")
             for photo in all_matches:
                 print(str(photo))
         else:
-            print("No photos found with all of those tags")
-
+            print("No photos found with all of those tags.")
+        
         if len(partial_matches) > 0:
-            print("Here are the photos with one or more of those tags:")
+            print("Here are the photos that match at least one of those tags:")
             for photo in partial_matches:
                 print(str(photo))
         else:
-            print("No additional photos found with one or more of those tags")
+            print("No photos found that match any of those tags.")
 
 def get_input(prompt):
     resp = ""
