@@ -1,6 +1,47 @@
+import sys
 from photo import Photo
 from album import Album
 from graphics import *
+
+def can_read_file(filename):
+    """
+    Returns True if the given filename can be opened for reading,
+    False otherwise.
+    """
+    try:
+        fp = open(filename, "r")
+        fp.close()
+        return True
+    except IOError:
+        return False
+
+
+def get_filename():
+    """
+    Determines the input filename to use.
+    First tries the first command line argument (if provided).
+    If that argument is missing or cannot be read, the user is
+    repeatedly prompted to enter a filename until a readable file
+    is provided.
+    """
+    filename = None
+
+    if len(sys.argv) > 1:
+        candidate = sys.argv[1]
+        if can_read_file(candidate):
+            filename = candidate
+        else:
+            print("Could not read file '%s'" % candidate)
+
+    while filename is None:
+        candidate = input("Enter the name of the input file: ")
+        if can_read_file(candidate):
+            filename = candidate
+        else:
+            print("Could not read file '%s'. Please try again." % candidate)
+
+    return filename
+
 
 def get_value_between(prompt, low, high):
     choice = int(input(prompt))
@@ -117,7 +158,8 @@ def addPhoto(album):
 
 
 def main():
-    album = initialize("dogs.txt", "cartoon dog photos")
+    filename = get_filename()
+    album = initialize(filename, "cartoon dog photos")
 
     choice = -1
 
