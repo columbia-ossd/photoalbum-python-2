@@ -30,15 +30,31 @@ def initialize(filename, title):
 
     return album
 
+def save_album(album, filename):
+    fp = open(filename, "w")
+
+    for photo in album.get_photos():
+        line = photo.get_filename()
+        line = line + "," + photo.get_creator()
+        line = line + "," + photo.get_description()
+
+        for tag in photo.get_tags():
+            line = line + "," + tag
+
+        fp.write(line + "\n")
+
+    fp.close()
+
 def menu():
     print()
     print("1: List all photos")
     print("2: Add a photo")
     print("3: Search photos by tag")
     print("4: View a photo")
-    print("5: Exit")
+    print("5: Remove a photo")
+    print("6: Exit")
 
-    choice = get_value_between("Choose an option: ", 1, 5)
+    choice = get_value_between("Choose an option: ", 1, 6)
     return choice
 
 def viewPhoto(album):
@@ -115,13 +131,43 @@ def addPhoto(album):
     else:
         print("Could not add photo to album")
 
+def removePhoto(album, filename):
+    """
+    Function for Menu Option 5
+    """
+    print()
+    photos = album.get_photos()
+    if len(photos) == 0:
+        print("There are no photos to remove")
+        return
+
+    for i in range(len(photos)):
+        number = i + 1
+        description = photos[i].get_description()
+        print(str(number) + ": " + description)
+
+    choice = get_value_between("Choose a photo to remove: ", 1, len(photos))
+    photo = photos[choice-1]
+
+    question = "Remove " + photo.get_description() + "? (y/n): "
+    confirm = input(question).lower()
+    if confirm == "y" or confirm == "yes":
+        if album.remove_photo(choice-1):
+            save_album(album, filename)
+            print("Photo removed")
+        else:
+            print("Could not remove photo")
+    else:
+        print("Removal canceled")
+
 
 def main():
-    album = initialize("dogs.txt", "cartoon dog photos")
+    filename = "dogs.txt"
+    album = initialize(filename, "cartoon dog photos")
 
     choice = -1
 
-    while choice != 5:
+    while choice != 6:
         choice = menu()
         if choice == 1: # list all photos
             for photo in album.get_photos():
@@ -132,6 +178,8 @@ def main():
             searchByTag(album)
         elif choice == 4: # view a photo
             viewPhoto(album)
+        elif choice == 5: # remove a photo
+            removePhoto(album, filename)
     
     print("Good bye!")
 

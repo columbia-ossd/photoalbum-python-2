@@ -19,6 +19,12 @@ class Album():
         self.photos.append(p)
         return True
 
+    def remove_photo(self, index):
+        if index < 0 or index >= len(self.photos):
+            return False
+        self.photos.pop(index)
+        return True
+
     def get_photos(self):
         return self.photos
     
