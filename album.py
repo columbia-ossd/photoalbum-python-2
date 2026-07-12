@@ -25,6 +25,12 @@ class Album():
     def get_count(self):
         return len(self.photos)
     
+    def save(self, filename):
+        with open(filename, "w") as fp:
+            for photo in self.photos:
+                parts = [photo.get_filename(), photo.get_creator(), photo.get_description()] + photo.get_tags()
+                fp.write(",".join(parts) + "\n")
+    
     def get_tags(self):
         tags = []
         for photo in self.photos:
