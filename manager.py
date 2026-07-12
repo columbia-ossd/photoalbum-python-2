@@ -1,5 +1,6 @@
 from photo import Photo
 from album import Album
+import os
 from graphics import *
 
 def get_value_between(prompt, low, high):
@@ -14,6 +15,21 @@ def get_value_between(prompt, low, high):
             continue
         return choice
 
+def saveAlbum(album, filename):
+    fp = open(filename, "w")
+    for photo in album.get_photos():
+        parts = []
+        parts.append(photo.get_filename())
+        parts.append(photo.get_creator())
+        parts.append(photo.get_description())
+        
+        for tag in photo.get_tags():
+            parts.append(tag)
+            
+        line = ",".join(parts)
+        fp.write(line+"\n")
+        
+    fp.close()
 
 def initialize(filename, title):
     album = Album(title)
@@ -41,10 +57,54 @@ def menu():
     print("2: Add a photo")
     print("3: Search photos by tag")
     print("4: View a photo")
-    print("5: Exit")
+    print("5: Edit a photo")
+    print("6: Exit")
 
-    choice = get_value_between("Choose an option: ", 1, 5)
+    choice = get_value_between("Choose an option: ", 1, 6)
     return choice
+
+def editPhoto(album):
+    """
+    Function for Menu Option 5
+    """
+    print("Edit Photo")
+    photos = album.get_photos()
+    for i in range(len(photos)):
+        print("%d: %s | %s | created by %s" % (i+1, photos[i].get_description(), photos[i].get_filename(), photos[i].get_creator()))
+    choice = get_value_between("Choose a photo to edit: ", 1, len(photos))
+    selected_photo = photos[choice-1]
+    print()
+    print("1: Filename")
+    print("2: Creator")
+    print("3: Description")
+    field_choice = get_value_between("Choose a field to edit: ", 1, 3)
+    if field_choice == 1:
+        while True:
+            new_filename = get_input("Enter the new filename: ")
+            
+            if not os.path.isfile(new_filename):
+                print("Photo file DNE. Try again.")
+                continue
+            
+            duplicate = False
+            for photo in album.get_photos():
+                if photo != selected_photo and photo.get_filename() == new_filename:
+                    duplicate = True
+                    break
+            if duplicate:
+                print("Filename taken. Try again.")
+                continue
+            selected_photo.edit_filename(new_filename)
+            break
+                
+    elif field_choice == 2:
+        new_creator = get_input("Enter the new creator: ")
+        selected_photo.edit_creator(new_creator)
+    elif field_choice == 3:
+        new_description = get_input("Enter the new description: ")
+        selected_photo.edit_description(new_description)
+    saveAlbum(album, "dogs.txt")
+    print("Photo successfully edited")
 
 def viewPhoto(album):
     """
@@ -126,7 +186,7 @@ def main():
 
     choice = -1
 
-    while choice != 5:
+    while choice != 6:
         choice = menu()
         if choice == 1: # list all photos
             for photo in album.get_photos():
@@ -137,6 +197,8 @@ def main():
             searchByTag(album)
         elif choice == 4: # view a photo
             viewPhoto(album)
+        elif choice == 5: # Edit a photo
+            editPhoto(album)
     
     print("Good bye!")
 
