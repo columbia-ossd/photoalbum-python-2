@@ -77,9 +77,10 @@ def menu():
     print("2: Add a photo")
     print("3: Search photos by tag")
     print("4: View a photo")
-    print("5: Exit")
+    print("5: Edit a photo's tags")
+    print("6: Exit")
 
-    choice = get_value_between("Choose an option: ", 1, 5)
+    choice = get_value_between("Choose an option: ", 1, 6)
     return choice
 
 def viewPhoto(album):
@@ -156,6 +157,24 @@ def addPhoto(album):
     else:
         print("Could not add photo to album")
 
+def editTags(album, filename):
+    """
+    Function for Menu Option 5
+    """
+    print()
+    photos = album.get_photos()
+    for i in range(len(photos)):
+        print("%d: %s" % (i+1, photos[i].get_description()))
+    choice = get_value_between("Choose a photo: ", 1, len(photos))
+
+    photo = photos[choice-1]
+    print("Current tags: " + " ".join(photo.get_tags()))
+    tagString = input("Enter the new tags, separated by spaces: ")
+    photo.set_tags(tagString.split(" "))
+
+    album.save(filename)
+    print("Tags updated")
+
 
 def main():
     filename = get_filename()
@@ -163,7 +182,7 @@ def main():
 
     choice = -1
 
-    while choice != 5:
+    while choice != 6:
         choice = menu()
         if choice == 1: # list all photos
             for photo in album.get_photos():
@@ -174,6 +193,8 @@ def main():
             searchByTag(album)
         elif choice == 4: # view a photo
             viewPhoto(album)
+        elif choice == 5: # edit tags
+            editTags(album, filename)
     
     print("Good bye!")
 
