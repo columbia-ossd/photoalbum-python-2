@@ -35,6 +35,9 @@ class Photo():
 
     def get_tags(self):
         return self.tags
+    
+    def set_tags(self, tags):
+        self.tags = [tag.lower() for tag in tags]
 
 
     def __str__(self):

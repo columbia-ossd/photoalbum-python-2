@@ -1,7 +1,48 @@
+import sys
 from photo import Photo
 from album import Album
 import os
 from graphics import *
+
+def can_read_file(filename):
+    """
+    Returns True if the given filename can be opened for reading,
+    False otherwise.
+    """
+    try:
+        fp = open(filename, "r")
+        fp.close()
+        return True
+    except IOError:
+        return False
+
+
+def get_filename():
+    """
+    Determines the input filename to use.
+    First tries the first command line argument (if provided).
+    If that argument is missing or cannot be read, the user is
+    repeatedly prompted to enter a filename until a readable file
+    is provided.
+    """
+    filename = None
+
+    if len(sys.argv) > 1:
+        candidate = sys.argv[1]
+        if can_read_file(candidate):
+            filename = candidate
+        else:
+            print("Could not read file '%s'" % candidate)
+
+    while filename is None:
+        candidate = input("Enter the name of the input file: ")
+        if can_read_file(candidate):
+            filename = candidate
+        else:
+            print("Could not read file '%s'. Please try again." % candidate)
+
+    return filename
+
 
 def get_value_between(prompt, low, high):
     while True:
@@ -57,15 +98,16 @@ def menu():
     print("2: Add a photo")
     print("3: Search photos by tag")
     print("4: View a photo")
-    print("5: Edit a photo")
-    print("6: Exit")
+    print("5: Edit a photo's tags")
+    print("6: Edit a photo")
+    print("7: Exit")
 
-    choice = get_value_between("Choose an option: ", 1, 6)
+    choice = get_value_between("Choose an option: ", 1, 7)
     return choice
 
-def editPhoto(album):
+def editPhoto(album, filename):
     """
-    Function for Menu Option 5
+    Function for Menu Option 6
     """
     print("Edit Photo")
     photos = album.get_photos()
@@ -103,7 +145,7 @@ def editPhoto(album):
     elif field_choice == 3:
         new_description = get_input("Enter the new description: ")
         selected_photo.edit_description(new_description)
-    saveAlbum(album, "dogs.txt")
+    saveAlbum(album, filename)
     print("Photo successfully edited")
 
 def viewPhoto(album):
@@ -144,18 +186,59 @@ def searchByTag(album):
     print()
     tags = " ".join(album.get_tags())
     print("Here are the tags: " + tags)
-    term = input("Enter the tag to search for: ").lower()
-    found = []
-    for photo in album.get_photos():
-        if term in photo.get_tags():
-            found.append(photo)
-    if len(found) > 0:
-        print("Here are the photos for that tag:")
-        for photo in found:
-            print(str(photo))
-    else:
-        print("No photos found for tag " + term)
+    search_terms = input("Enter the tag(s) to search for, separated by spaces: ").lower().split()
     
+    # Remove duplicate search terms while keeping the original order.
+    unique_terms = []
+    for term in search_terms:
+        if term not in unique_terms:
+            unique_terms.append(term)
+    
+    if len(unique_terms) == 0:
+        print("No tags entered.")
+        return
+    
+    all_matches= []
+    partial_matches = []
+
+    for photo in album.get_photos():
+        photo_tags = photo.get_tags()
+        matches_all = True
+        matches_any = False
+
+        for term in unique_terms:
+            if term in photo_tags:
+                matches_any = True 
+            else:
+                matches_all = False
+    
+        if matches_all:
+            all_matches.append(photo)
+        elif matches_any:
+            partial_matches.append(photo)
+    
+    if len(unique_terms) == 1:
+        if len(all_matches) > 0:
+            print("Here are the photos for that tag:")
+            for photo in all_matches:
+                print(str(photo))
+        else:
+            print("No photos found for tag " + unique_terms[0])
+    
+    else:
+        if len(all_matches) > 0:
+            print("Here are the photos that match all of those tags:")
+            for photo in all_matches:
+                print(str(photo))
+        else:
+            print("No photos found with all of those tags.")
+        
+        if len(partial_matches) > 0:
+            print("Here are the photos that match at least one of those tags:")
+            for photo in partial_matches:
+                print(str(photo))
+        else:
+            print("No photos found that match any of those tags.")
 
 def get_input(prompt):
     resp = ""
@@ -180,13 +263,32 @@ def addPhoto(album):
     else:
         print("Could not add photo to album")
 
+def editTags(album, filename):
+    """
+    Function for Menu Option 5
+    """
+    print()
+    photos = album.get_photos()
+    for i in range(len(photos)):
+        print("%d: %s" % (i+1, photos[i].get_description()))
+    choice = get_value_between("Choose a photo: ", 1, len(photos))
+
+    photo = photos[choice-1]
+    print("Current tags: " + " ".join(photo.get_tags()))
+    tagString = input("Enter the new tags, separated by spaces: ")
+    photo.set_tags(tagString.split(" "))
+
+    album.save(filename)
+    print("Tags updated")
+
 
 def main():
-    album = initialize("dogs.txt", "cartoon dog photos")
+    filename = get_filename()
+    album = initialize(filename, "cartoon dog photos")
 
     choice = -1
 
-    while choice != 6:
+    while choice != 7:
         choice = menu()
         if choice == 1: # list all photos
             for photo in album.get_photos():
@@ -197,8 +299,10 @@ def main():
             searchByTag(album)
         elif choice == 4: # view a photo
             viewPhoto(album)
-        elif choice == 5: # Edit a photo
-            editPhoto(album)
+        elif choice == 5: # edit tags
+            editTags(album, filename)
+        elif choice == 6: # edit photo info
+            editPhoto(album, filename)
     
     print("Good bye!")
 
