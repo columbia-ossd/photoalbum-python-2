@@ -14,11 +14,20 @@ class Photo():
     def get_filename(self):
         return self.filename
     
+    def edit_filename(self, new_filename):
+        self.filename = new_filename
+    
     def get_creator(self):
         return self.creator
     
+    def edit_creator(self, new_creator):
+        self.creator = new_creator
+    
     def get_description(self):
         return self.description
+    
+    def edit_description(self, new_description):
+        self.description = new_description
     
     def add_tag(self, tag):
         if tag not in self.tags:
