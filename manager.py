@@ -187,7 +187,7 @@ def get_input(prompt):
     return resp      
 
 
-def addPhoto(album):
+def addPhoto(album, filename):
     """
     Function for Menu Option 2
     """
@@ -198,11 +198,13 @@ def addPhoto(album):
     tagString = input("Enter all the tags, separated by spaces: ")
     tags = tagString.split(" ")
     #print(tags)
-    if album.add_photo(Photo(fname, creator, description, tags)):
+    photo = Photo(fname, creator, description, tags)
+
+    if album.add_photo(photo):
+        album.save(filename)
         print("Photo successfully added")
     else:
         print("Could not add photo to album")
-
 def editTags(album, filename):
     """
     Function for Menu Option 5
@@ -234,7 +236,7 @@ def main():
             for photo in album.get_photos():
               print(str(photo))
         elif choice == 2: # add a photo
-            addPhoto(album)
+            addPhoto(album, filename)
         elif choice == 3: # search by tag
             searchByTag(album)
         elif choice == 4: # view a photo
